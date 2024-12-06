@@ -1,0 +1,24 @@
+import subprocess
+import re
+
+# Define the PowerShell command to get the lsass process information
+command = "Get-Process lsass | Select-Object -ExpandProperty Id"
+
+# Use subprocess to execute the command
+try:
+    result = subprocess.run(
+        ["powershell", "-Command", command],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    
+    # Extract and print the Process ID
+    lsass_id = result.stdout.strip()
+    if lsass_id.isdigit():
+        print(f"LSASS Process ID: {lsass_id}")
+    else:
+        print("Failed to retrieve the LSASS Process ID.")
+except subprocess.CalledProcessError as e:
+    print("Error occurred:")
+    print(e.stderr)
